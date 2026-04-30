@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Optimizer — doums.ia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="top-bar">
+            <h1>✨ Prompt Optimizer</h1>
+            <button id="history-toggle-btn" class="btn-history" style="display:none;">📋 Historique (<span id="history-badge">0</span>)</button>
+        </div>
+        <p class="subtitle">Décris ta demande en langage naturel, je génère le prompt parfait pour ChatGPT, Claude ou Gemini.</p>
+
+        <!-- Panel historique -->
+        <div id="history-panel" style="display:none;">
+            <div class="history-panel-header">
+                <span>Sessions de prompts</span>
+                <button id="history-close-btn" class="btn-history-close">✕</button>
+            </div>
+            <div id="history-list"></div>
+        </div>
+
+        <!-- Étape 1 : saisie libre -->
+        <div id="step-request">
+            <div class="input-group">
+                <label for="user-request">Ta demande</label>
+                <textarea id="user-request" rows="4" placeholder="Ex : je veux écrire un email professionnel pour relancer un client qui n'a pas payé sa facture depuis 3 semaines..."></textarea>
+            </div>
+            <button id="analyze-btn">Analyser ma demande →</button>
+        </div>
+
+        <!-- Étape 2 : questions de clarification -->
+        <div id="step-questions" style="display: none;">
+            <div id="understood-box" class="understood-box"></div>
+            <div id="questions-form"></div>
+            <div class="btn-row">
+                <button id="back-btn" class="btn-secondary">← Modifier</button>
+                <button id="generate-btn">Générer le Prompt →</button>
+            </div>
+        </div>
+
+        <!-- Chargement -->
+        <div id="loading" class="loading">
+            <span class="spinner"></span>
+            <span id="loading-text">Analyse en cours...</span>
+        </div>
+
+        <!-- Résultat -->
+        <div id="result-area" style="display: none;">
+            <div class="result-header">
+                <span>✅ Prompt optimisé</span>
+                <button id="copy-btn" class="btn-copy">Copier</button>
+            </div>
+            <div id="result-content"></div>
+            <button id="new-prompt-btn" class="btn-new">+ Nouveau Prompt</button>
+        </div>
+
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
