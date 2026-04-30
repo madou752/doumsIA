@@ -1,4 +1,6 @@
-// Références DOM
+// ═══════════════════════════════════════
+// RÉFÉRENCES DOM
+// ═══════════════════════════════════════
 const userRequestTextarea = document.getElementById('user-request');
 const analyzeBtn = document.getElementById('analyze-btn');
 const stepRequest = document.getElementById('step-request');
@@ -18,17 +20,74 @@ const historyBadge = document.getElementById('history-badge');
 const historyPanel = document.getElementById('history-panel');
 const historyList = document.getElementById('history-list');
 const historyCloseBtn = document.getElementById('history-close-btn');
+const ctaStartBtn = document.getElementById('cta-start');
+const navBurger = document.getElementById('nav-burger');
+const navOverlay = document.getElementById('nav-overlay');
+const navLinks = document.querySelector('.nav-links');
 
-// Mémoire courte de session (réinitialisée au rechargement de page)
-// Chaque entrée : { request, prompt, date }
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
 let sessionHistory = [];
 let sessionPrompts = [];
 let currentRequest = '';
 let currentUnderstood = '';
 let currentQuestions = [];
+let selectedAIType = 'chatgpt';
 
-// --- Helpers UI ---
+// ═══════════════════════════════════════
+// CHIPS IA
+// ═══════════════════════════════════════
+document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedAIType = chip.dataset.type;
+    });
+});
 
+// ═══════════════════════════════════════
+// CTA → focus widget
+// ═══════════════════════════════════════
+const ctaTryBtn = document.getElementById('cta-try');
+
+ctaStartBtn.addEventListener('click', () => {
+    userRequestTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => userRequestTextarea.focus(), 400);
+});
+
+ctaTryBtn.addEventListener('click', () => {
+    userRequestTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => userRequestTextarea.focus(), 400);
+});
+
+// ═══════════════════════════════════════
+// NAV MOBILE
+// ═══════════════════════════════════════
+function toggleMobileNav() {
+    navLinks.classList.toggle('open');
+    navBurger.classList.toggle('open');
+    navOverlay.classList.toggle('active');
+    document.body.classList.toggle('nav-open');
+}
+
+function closeMobileNav() {
+    navLinks.classList.remove('open');
+    navBurger.classList.remove('open');
+    navOverlay.classList.remove('active');
+    document.body.classList.remove('nav-open');
+}
+
+navBurger.addEventListener('click', toggleMobileNav);
+navOverlay.addEventListener('click', closeMobileNav);
+
+navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMobileNav);
+});
+
+// ═══════════════════════════════════════
+// HELPERS UI
+// ═══════════════════════════════════════
 function showLoading(text) {
     loadingText.textContent = text;
     loadingDiv.style.display = 'flex';
@@ -45,7 +104,7 @@ function showError(msg) {
     err.id = 'error-msg';
     err.className = 'error-msg';
     err.textContent = msg;
-    document.querySelector('.chat-container').appendChild(err);
+    document.querySelector('.widget-body').appendChild(err);
     setTimeout(() => { if (err.parentNode) err.remove(); }, 6000);
 }
 
@@ -63,7 +122,6 @@ function renderHistoryPanel() {
         historyList.innerHTML = '<p class="history-empty">Aucun prompt généré pour le moment.</p>';
         return;
     }
-    // Plus récent en premier
     [...sessionPrompts].reverse().forEach((entry, idx) => {
         const realIdx = sessionPrompts.length - 1 - idx;
         const item = document.createElement('div');
@@ -80,7 +138,6 @@ function renderHistoryPanel() {
         historyList.appendChild(item);
     });
 
-    // Boutons copier dans l'historique
     historyList.querySelectorAll('.history-copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const i = parseInt(btn.dataset.idx);
@@ -112,12 +169,13 @@ function resetToStart() {
     userRequestTextarea.focus();
 }
 
-// --- Étape 1 : Analyser la demande ---
-
+// ═══════════════════════════════════════
+// ÉTAPE 1 : Analyser la demande
+// ═══════════════════════════════════════
 analyzeBtn.addEventListener('click', async () => {
     const request = userRequestTextarea.value.trim();
     if (!request) {
-        userRequestTextarea.style.borderColor = '#ff6b6b';
+        userRequestTextarea.style.borderColor = '#EF4444';
         userRequestTextarea.focus();
         setTimeout(() => { userRequestTextarea.style.borderColor = ''; }, 1500);
         return;
@@ -128,10 +186,10 @@ analyzeBtn.addEventListener('click', async () => {
     showLoading('Analyse de ta demande...');
 
     try {
-        const response = await fetch('/api/analyze', {
+        const response = await fetch('http://localhost:3000/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ request, history: sessionHistory })
+            body: JSON.stringify({ request, aiType: selectedAIType, history: sessionHistory })
         });
 
         if (!response.ok) throw new Error('Erreur serveur');
@@ -142,10 +200,8 @@ analyzeBtn.addEventListener('click', async () => {
 
         hideLoading();
 
-        // Afficher la compréhension
         understoodBox.innerHTML = `<strong>💡 Compris :</strong> ${data.understood}`;
 
-        // Générer le formulaire de questions
         questionsForm.innerHTML = '';
         if (data.needsQuestions && currentQuestions.length > 0) {
             const title = document.createElement('p');
@@ -182,8 +238,9 @@ analyzeBtn.addEventListener('click', async () => {
     }
 });
 
-// --- Bouton retour ---
-
+// ═══════════════════════════════════════
+// BOUTON RETOUR
+// ═══════════════════════════════════════
 backBtn.addEventListener('click', () => {
     stepQuestions.style.display = 'none';
     stepRequest.style.display = 'block';
@@ -192,10 +249,10 @@ backBtn.addEventListener('click', () => {
     currentUnderstood = '';
 });
 
-// --- Étape 2 : Générer le prompt final ---
-
+// ═══════════════════════════════════════
+// ÉTAPE 2 : Générer le prompt final
+// ═══════════════════════════════════════
 generateBtn.addEventListener('click', async () => {
-    // Collecter les réponses aux questions
     const answers = {};
     document.querySelectorAll('.question-input').forEach(input => {
         const label = input.previousElementSibling.textContent;
@@ -210,12 +267,13 @@ generateBtn.addEventListener('click', async () => {
     stepQuestions.style.display = 'none';
 
     try {
-        const response = await fetch('/api/generate-prompt', {
+        const response = await fetch('http://localhost:3000/api/generate-prompt', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 request: currentRequest,
                 understood: currentUnderstood,
+                aiType: selectedAIType,
                 answers,
                 history: sessionHistory
             })
@@ -226,7 +284,6 @@ generateBtn.addEventListener('click', async () => {
         const data = await response.json();
         hideLoading();
 
-        // Ajouter à la mémoire de session
         sessionHistory.push(currentRequest);
         sessionPrompts.push({
             request: currentRequest,
@@ -234,12 +291,10 @@ generateBtn.addEventListener('click', async () => {
             date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
         });
         updateHistoryBar();
-        // Rafraîchir le panel si ouvert
         if (historyPanel.style.display === 'block') renderHistoryPanel();
 
-        // Afficher le résultat
         resultContent.textContent = data.prompt;
-        copyBtn.textContent = 'Copier';
+        copyBtn.textContent = '📋 Copier';
         resultArea.style.display = 'block';
 
     } catch (error) {
@@ -253,18 +308,20 @@ generateBtn.addEventListener('click', async () => {
     }
 });
 
-// --- Copier le prompt ---
-
+// ═══════════════════════════════════════
+// COPIER LE PROMPT
+// ═══════════════════════════════════════
 copyBtn.addEventListener('click', () => {
     const text = resultContent.textContent;
     navigator.clipboard.writeText(text).then(() => {
         copyBtn.textContent = '✓ Copié !';
-        setTimeout(() => { copyBtn.textContent = 'Copier'; }, 2000);
+        setTimeout(() => { copyBtn.textContent = '📋 Copier'; }, 2000);
     }).catch(() => {
         showError('Impossible d\'accéder au presse-papiers.');
     });
 });
 
-// --- Nouveau prompt ---
-
+// ═══════════════════════════════════════
+// NOUVEAU PROMPT
+// ═══════════════════════════════════════
 newPromptBtn.addEventListener('click', resetToStart);
