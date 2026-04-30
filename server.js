@@ -116,6 +116,11 @@ Génère UNIQUEMENT le prompt final optimisé. Aucune introduction, aucune expli
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Serveur démarré sur http://localhost:${PORT}`);
-});
+// Local dev
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Serveur démarré sur http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
