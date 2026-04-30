@@ -186,7 +186,7 @@ analyzeBtn.addEventListener('click', async () => {
     showLoading('Analyse de ta demande...');
 
     try {
-        const response = await fetch('http://localhost:3000/api/analyze', {
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ request, aiType: selectedAIType, history: sessionHistory })
@@ -232,7 +232,7 @@ analyzeBtn.addEventListener('click', async () => {
     } catch (error) {
         console.error(error);
         hideLoading();
-        showError('Impossible de se connecter au serveur. Vérifie que Node.js est lancé sur le port 3000.');
+        showError('Impossible de se connecter au serveur. Vérifie ta connexion et réessaie.');
     } finally {
         analyzeBtn.disabled = false;
     }
@@ -267,7 +267,7 @@ generateBtn.addEventListener('click', async () => {
     stepQuestions.style.display = 'none';
 
     try {
-        const response = await fetch('http://localhost:3000/api/generate-prompt', {
+        const response = await fetch('/api/generate-prompt', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
