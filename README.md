@@ -104,6 +104,6 @@ Sur Vercel, ajoute `AI_API_KEY` dans les variables d'environnement du projet.
 
 ## Auteur
 
-**Mehdi Hammadou** (Madou)
+**Mehdi Hammadou**
 
 [Portfolio](https://portfoliohammadoumehdi.vercel.app/) · [GitHub](https://github.com/madou752)
